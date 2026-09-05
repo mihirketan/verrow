@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verrow — Know when you drift from yourself</title>
+<meta name="description" content="Verrow logs your trading day in under a minute, then shows you the gap between the trader you think you are and the one your history proves you to be.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#171b22;
+    --ink-2:#1e232c;
+    --paper:#ece5d4;
+    --paper-2:#e2dac5;
+    --amber:#c98a2c;
+    --amber-text:#e7ad5b;
+    --sage:#4f8271;
+    --sage-text:#7bb09d;
+    --hi:#f2efe6;
+    --mid:#a9a69c;
+    --line:#333944;
+    --line-soft:#2a2f38;
+    --serif:'Fraunces', serif;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Sans', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--hi);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.04em;
+    color:var(--mid);
+  }
+  h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0;}
+  p{color:var(--mid);max-width:60ch;}
+  ::selection{background:var(--amber);color:var(--ink);}
+  :focus-visible{outline:2px solid var(--amber-text);outline-offset:3px;}
+
+  /* header */
+  header{
+    position:sticky;top:0;z-index:20;
+    background:rgba(23,27,34,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;max-width:1080px;margin:0 auto;
+  }
+  .logo{
+    font-family:var(--mono);font-size:15px;letter-spacing:.03em;
+    font-weight:500;
+  }
+  .navlinks{display:flex;gap:32px;align-items:center;}
+  .navlinks a{
+    font-size:14px;color:var(--mid);text-decoration:none;
+  }
+  .navlinks a:hover{color:var(--hi);}
+  .btn{
+    font-family:var(--mono);font-size:13px;
+    background:none;border:1px solid var(--amber);color:var(--amber-text);
+    padding:9px 18px;border-radius:3px;cursor:pointer;text-decoration:none;
+    display:inline-block;
+  }
+  .btn:hover{background:var(--amber);color:var(--ink);}
+  .navtoggle{display:none;background:none;border:none;color:var(--hi);font-size:24px;cursor:pointer;}
+
+  /* hero */
+  .hero{
+    padding:88px 0 96px;
+    display:grid;grid-template-columns:1.15fr .85fr;gap:56px;align-items:center;
+  }
+  .hero h1{font-size:clamp(34px,4.4vw,52px);line-height:1.12;color:var(--hi);margin-bottom:22px;}
+  .hero p{font-size:17px;margin-bottom:32px;}
+  .hero-cta{display:flex;gap:10px;flex-wrap:wrap;}
+  .hero-cta input{
+    font-family:var(--sans);font-size:14px;
+    background:var(--ink-2);border:1px solid var(--line);color:var(--hi);
+    padding:12px 14px;border-radius:3px;min-width:230px;flex:1;
+  }
+  .hero-cta input::placeholder{color:var(--mid);}
+  .hero-cta button{
+    font-family:var(--mono);font-size:13px;background:var(--amber);color:var(--ink);
+    border:none;padding:12px 20px;border-radius:3px;cursor:pointer;font-weight:500;
+  }
+  .hero-note{font-family:var(--mono);font-size:12px;color:var(--mid);margin-top:12px;}
+
+  .instrument{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:20px;}
+  .instrument-label{font-family:var(--mono);font-size:11px;color:var(--mid);letter-spacing:.03em;margin-bottom:10px;}
+
+  section{padding:80px 0;border-top:1px solid var(--line-soft);}
+  .section-head{max-width:640px;margin-bottom:44px;}
+  .section-head h2{font-size:clamp(24px,3vw,32px);color:var(--hi);margin-top:10px;}
+
+  /* how it works — ledger list */
+  .ledger{border-top:1px solid var(--line);}
+  .ledger-row{
+    display:grid;grid-template-columns:60px 1fr 1.4fr;gap:24px;
+    padding:26px 0;border-bottom:1px solid var(--line);
+  }
+  .ledger-num{font-family:var(--mono);font-size:14px;color:var(--amber-text);}
+  .ledger-row h3{font-size:19px;color:var(--hi);margin-bottom:6px;}
+  .ledger-row p{margin:0;font-size:15px;max-width:52ch;}
+
+  /* qty engine */
+  .qty-section{background:var(--paper);color:var(--ink);}
+  .qty-section .eyebrow{color:#7a7462;}
+  .qty-section h2{color:var(--ink);}
+  .qty-section p{color:#5a5648;}
+  .qty-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;}
+  .formula-box{
+    font-family:var(--mono);font-size:14px;background:var(--paper-2);
+    border:1px solid #c9c1aa;border-radius:4px;padding:18px 20px;color:#3d3a2f;margin-top:20px;
+  }
+  .chart-panel{background:var(--paper-2);border:1px solid #c9c1aa;border-radius:6px;padding:24px;}
+  .bars{display:flex;align-items:flex-end;gap:28px;height:180px;margin-top:20px;}
+  .bar-col{flex:1;text-align:center;}
+  .bar{width:100%;border-radius:3px 3px 0 0;}
+  .bar-oct{height:140px;background:#8d8874;}
+  .bar-nov{height:98px;background:var(--amber);}
+  .bar-dec{height:140px;background:var(--sage);}
+  .bar-label{font-family:var(--mono);font-size:12px;margin-top:8px;color:#6b6754;}
+  .bar-val{font-family:var(--mono);font-size:13px;font-weight:500;color:#3d3a2f;}
+
+  /* psychology */
+  .msg{
+    border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:14px;
+    background:var(--ink-2);
+  }
+  .msg-tag{font-family:var(--mono);font-size:11px;color:var(--amber-text);letter-spacing:.03em;margin-bottom:8px;}
+  .msg p{margin:0;color:var(--hi);font-size:15px;max-width:none;}
+  .disclaimer{
+    font-family:var(--mono);font-size:12px;color:var(--mid);
+    border-left:2px solid var(--line);padding-left:14px;margin-top:32px;max-width:64ch;
+  }
+
+  /* pricing */
+  .price-table{border-top:1px solid var(--line);}
+  .price-row{
+    display:grid;grid-template-columns:1fr 140px 140px;gap:16px;
+    padding:18px 0;border-bottom:1px solid var(--line);align-items:center;font-size:14px;
+  }
+  .price-row.head{font-family:var(--mono);color:var(--mid);font-size:12px;}
+  .price-row .yes{color:var(--sage-text);font-family:var(--mono);}
+  .price-row .no{color:var(--mid);font-family:var(--mono);}
+  .tier-name{font-family:var(--mono);font-size:16px;color:var(--hi);}
+  .tier-price{color:var(--mid);}
+
+  footer{border-top:1px solid var(--line-soft);padding:56px 0 40px;}
+  .foot-grid{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:24px;}
+  .foot-grid p{font-size:13px;}
+
+  @media (max-width:820px){
+    .hero{grid-template-columns:1fr;padding-top:48px;}
+    .qty-grid{grid-template-columns:1fr;}
+    .ledger-row{grid-template-columns:40px 1fr;}
+    .ledger-row > p{grid-column:2;}
+    .navlinks{display:none;}
+    .price-row{grid-template-columns:1fr 90px 90px;font-size:13px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo">VERROW</div>
+    <nav class="navlinks">
+      <a href="#how">How it works</a>
+      <a href="#qty">Qty engine</a>
+      <a href="#psychology">Psychology</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <a class="btn" href="#join">Join waitlist</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap" style="border-top:none;">
+    <div>
+      <p class="eyebrow">FOR DISCRETIONARY &amp; FUNDED TRADERS</p>
+      <h1>Your trades are honest.<br>Your memory isn't.</h1>
+      <p>Log your day in under a minute. Verrow builds a baseline from your own history and shows you the exact moment you start trading like someone else.</p>
+      <div class="hero-cta" id="join">
+        <input type="email" placeholder="you@domain.com" aria-label="Email address">
+        <button type="button">Join waitlist</button>
+      </div>
+      <p class="hero-note">No broker connection required to start. Not investment advice.</p>
+    </div>
+    <div class="instrument">
+      <div class="instrument-label">TODAY vs. YOUR BASELINE</div>
+      <svg width="100%" viewBox="0 0 360 220" role="img" aria-label="Equity curve with one flagged trade that deviates from the trader's normal size">
+        <polyline points="10,170 50,150 90,160 130,120 170,130 210,80 250,95 290,40 340,55"
+          fill="none" stroke="#5a5f6b" stroke-width="1.5"/>
+        <circle cx="290" cy="40" r="5" fill="var(--amber)"/>
+        <line x1="290" y1="40" x2="290" y2="14" stroke="var(--amber)" stroke-width="1"/>
+        <text x="230" y="10" font-family="IBM Plex Mono" font-size="11" fill="var(--amber-text)">2.4× your normal size</text>
+        <text x="10" y="200" font-family="IBM Plex Mono" font-size="10" fill="#7d818c">Mar</text>
+        <text x="330" y="200" font-family="IBM Plex Mono" font-size="10" fill="#7d818c">Today</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="wrap" id="how">
+    <div class="section-head">
+      <p class="eyebrow">HOW IT WORKS</p>
+      <h2>Three steps, no manual charting.</h2>
+    </div>
+    <div class="ledger">
+      <div class="ledger-row">
+        <div class="ledger-num">01</div>
+        <h3>Log your day</h3>
+        <p>P&amp;L, total trades, and one honest question: did you follow your own rules today. Under a minute.</p>
+      </div>
+      <div class="ledger-row">
+        <div class="ledger-num">02</div>
+        <h3>Your dashboards update</h3>
+        <p>A quantity graph, a trade-frequency graph, a psychology graph, and a P&amp;L heatmap — one place, regardless of where you actually traded.</p>
+      </div>
+      <div class="ledger-row">
+        <div class="ledger-num">03</div>
+        <h3>Month-end review</h3>
+        <p>Verrow checks whether your quantity should change, based on your own recovery and consistency — never a mid-month impulse.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="qty-section" id="qty">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">THE QTY ENGINE</p>
+        <h2>Sizing decisions happen once a month, on purpose.</h2>
+      </div>
+      <div class="qty-grid">
+        <div>
+          <p>Your position size is fixed for the month. At month-end, Verrow checks two things: did you recover from a drawdown, or did you simply hold steady. Either one can earn you a larger size next month — but never all at once.</p>
+          <div class="formula-box">
+            new_qty = old_qty × (1 + recovered% × k)<br>
+            <span style="color:#7a7462;">k = 0.5 by default — a full recovery earns roughly a 15% increase, not a reset to full size.</span>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="instrument-label" style="color:#7a7462;">WORKED EXAMPLE</div>
+          <div class="bars">
+            <div class="bar-col">
+              <div class="bar bar-oct"></div>
+              <div class="bar-val">10K</div>
+              <div class="bar-label">Oct</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar bar-nov"></div>
+              <div class="bar-val">7K</div>
+              <div class="bar-label">Nov · −30%</div>
+            </div>
+            <div class="bar-col">
+              <div class="bar bar-dec"></div>
+              <div class="bar-val">10K</div>
+              <div class="bar-label">Dec · recovered</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap" id="psychology">
+    <div class="section-head">
+      <p class="eyebrow">PSYCHOLOGY &amp; AI</p>
+      <h2>It knows your patterns, not the market's.</h2>
+    </div>
+    <div class="msg">
+      <div class="msg-tag">AFTER TWO LOSSES</div>
+      <p>You've taken four trades today. Your fourth and fifth trades average −0.3R historically. What's the setup?</p>
+    </div>
+    <div class="msg">
+      <div class="msg-tag">LOSING STREAK</div>
+      <p>You normally take ten trades a day. On days like today, five has historically protected your expectancy better. Worth trying?</p>
+    </div>
+    <div class="msg">
+      <div class="msg-tag">WEEKLY PATTERN</div>
+      <p>Mondays account for most of your losses this quarter. Consider trading smaller or less until that shifts.</p>
+    </div>
+    <p class="disclaimer">This reflects your own history back to you. It does not predict the market and is not investment advice.</p>
+  </section>
+
+  <section class="wrap" id="pricing">
+    <div class="section-head">
+      <p class="eyebrow">PRICING</p>
+      <h2>Start free. Upgrade when the data's worth protecting.</h2>
+    </div>
+    <div class="price-table">
+      <div class="price-row head">
+        <div></div>
+        <div>Free</div>
+        <div>Pro</div>
+      </div>
+      <div class="price-row">
+        <div class="tier-name">Daily log &amp; dashboards</div>
+        <div class="yes">included</div>
+        <div class="yes">included</div>
+      </div>
+      <div class="price-row">
+        <div class="tier-name">P&amp;L heatmap</div>
+        <div class="yes">included</div>
+        <div class="yes">included</div>
+      </div>
+      <div class="price-row">
+        <div class="tier-name">Qty engine recommendations</div>
+        <div class="no">—</div>
+        <div class="yes">included</div>
+      </div>
+      <div class="price-row">
+        <div class="tier-name">AI psychology coaching</div>
+        <div class="no">—</div>
+        <div class="yes">included</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <div class="logo">VERROW</div>
+      <p>Working title — pending trademark and domain clearance.</p>
+    </div>
+    <a class="btn" href="#join">Join waitlist</a>
+  </div>
+</footer>
+
+</body>
+</html>
